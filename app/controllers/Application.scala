@@ -19,7 +19,7 @@ import reactivemongo.api._
 class Application @Inject() (val messagesApi: MessagesApi, val reactiveMongoApi: ReactiveMongoApi) extends Controller
   with MongoController with ReactiveMongoComponents with I18nSupport {
 
-  def itemCol: Future[JSONCollection] = database.map(_.collection[JSONCollection]("persons"))
+  def itemCol: Future[JSONCollection] = database.map(_.collection[JSONCollection]("ItemsCollection"))
 
   def add = Action.async {
     val result = itemCol.flatMap(_.insert(Item.items.head))
@@ -29,6 +29,20 @@ class Application @Inject() (val messagesApi: MessagesApi, val reactiveMongoApi:
   def find(name: String) = Action.async {
     val cursor: Future[Cursor[JsObject]] = itemCol.map{_.find(Json.obj("name"->name)).
       cursor[JsObject](ReadPreference.primary)}
+
+    val list: Future[List[JsObject]] = cursor.flatMap(_.collect[List]())
+
+    val array: Future[JsArray] = list.map {
+      item => Json.arr(item)
+    }
+
+    array.map{
+      item => Ok(item)
+    }
+  }
+
+  def getAll = Action.async {
+    val cursor: Future[Cursor[JsObject]] = itemCol.map{_.find(Json.obj()).cursor[JsObject](ReadPreference.primary)}
 
     val list: Future[List[JsObject]] = cursor.flatMap(_.collect[List]())
 
