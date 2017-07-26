@@ -1,7 +1,7 @@
-@(message: String)
+@(form: Form[Item], id: Int)(implicit messages: Messages)
 
 @main("Welcome to Play") {
 
-    @play20.welcome(message)
+    @itemform(form, id)
 
 }

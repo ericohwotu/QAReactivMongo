@@ -1,0 +1,38 @@
+@(form: Form[Item], id: Int)(implicit messages: Messages)
+
+@helper.form(action = routes.Application.formHandler(), 'class -> "form-inline") {
+    <div class="form-group" style="display: none">
+    @helper.inputText(form("id"), 'class -> "form-control", 'constraint -> "null", 'id -> "id-form")
+    </div>
+    <div class="form-group">
+        @helper.inputText(form("name"), 'class -> "form-control", 'constraint -> "null")
+    </div>
+    <div class="form-group">
+        @helper.inputText(form("price"), 'class -> "form-control")
+    </div>
+    <div class="form-group">
+        @helper.inputText(form("description"), 'class -> "form-control")
+    </div>
+    <div class="form-group">
+        @helper.inputText(form("manufacturer"), 'class -> "form-control")
+    </div>
+    <div class="form-group">
+        @helper.inputText(form("warranty"), 'class -> "form-control")
+    </div>
+    <div class="form-group">
+        @helper.inputText(form("discount"), 'class -> "form-control")
+    </div>
+    <div class="form-group">
+        @helper.inputText(form("seller"), 'class -> "form-control")
+    </div>
+    <div class="form-group">
+        @helper.inputText(form("image"), 'class -> "form-control")
+    </div>
+
+    <div class="form-group">
+    <button class="btn">Submit</button>
+    </div>
+    <div class="form-group">
+    <a class="btn" href="/?id=@id&isNew=true">Create New</a>
+    </div>
+}
