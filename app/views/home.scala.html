@@ -1,0 +1,35 @@
+@import scala.collection.mutable.ListBuffer
+@(pages: List[String], items: ListBuffer[Item], id: Int)(form: Form[Item])(implicit messages: Messages)
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+        <meta charset="UTF-8">
+        <title>Title</title>
+        <link rel="stylesheet" href="@routes.Assets.at("stylesheets/bootstrap.min.css")">
+        <link rel="stylesheet" href="@routes.Assets.at("stylesheets/items.css")">
+    </head>
+    <body>
+        @navbar("Item Manager With Mongo")(pages)
+
+        <div class="container-fluid">
+            <div class="row"></div>
+            <div class="col-sm-4 section">
+                @itemform(form, id)
+            </div>
+            <div class="col-sm-1"></div>
+            <div class="col-sm-7">
+                <div class="row section">
+                @itemslist(items)(id)
+                </div>
+                <br>
+                @if(items.length != 0) {
+                    <div class="row section">
+
+                    </div>
+                }
+            </div>
+
+        </div>
+
+    </body>
+</html>

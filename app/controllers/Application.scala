@@ -5,6 +5,7 @@ import javax.inject.Inject
 import models.Item
 import play.api.i18n.{I18nSupport, MessagesApi}
 
+import scala.util.{Failure, Success}
 import scala.concurrent.Future
 import play.api.mvc._
 import play.api.libs.concurrent.Execution.Implicits.defaultContext
@@ -13,28 +14,24 @@ import reactivemongo.play.json.collection._
 import reactivemongo.play.json._
 import reactivemongo.play.json.collection.{JSONCollection, JsCursor}
 import JsCursor._
+import helpers.{MongoHelpers, NavbarHelpers}
 import play.api.libs.json._
 import reactivemongo.api._
-import play.api.libs.functional.syntax._
 
-class Application @Inject() (val messagesApi: MessagesApi, val reactiveMongoApi: ReactiveMongoApi) extends Controller
+
+class Application @Inject()
+(val messagesApi: MessagesApi, val reactiveMongoApi: ReactiveMongoApi, val navbarHelpers: NavbarHelpers,
+ val mongoHelpers: MongoHelpers) extends Controller
   with MongoController with ReactiveMongoComponents with I18nSupport {
 
   //the collection for the items
   def itemCol: Future[JSONCollection] = database.map(_.collection[JSONCollection]("ItemsCollection"))
 
-  //json readers
-  implicit val itemWriter: Reads[Item] = (
-    (__ \ "id").read[String] and
-      (__ \ "name").read[String] and
-      (__ \ "price").read[BigDecimal] and
-      (__ \ "description").read[String] and
-      (__ \ "manufacturer").read[String] and
-      (__ \ "warranty").read[Int] and
-      (__ \ "discount").read[BigDecimal] and
-      (__ \ "seller").read[String] and
-      (__ \ "image").read[String]
-  )(Item.apply _)
+
+  def index(id: Int=0) = Action {
+    Ok (views.html.home(navbarHelpers.homePage, Item.items, id)(Item.itemForm))
+  }
+
 
 
   def add = Action.async {
@@ -43,51 +40,51 @@ class Application @Inject() (val messagesApi: MessagesApi, val reactiveMongoApi:
   }
 
   def find(name: String) = Action.async {
-    val cursor: Future[Cursor[JsObject]] = itemCol.map{_.find(Json.obj("name"->name)).
-      cursor[JsObject](ReadPreference.primary)}
+    val cursor: Future[Cursor[Item]] = itemCol.map{_.find(Json.obj("name"->name)).
+      cursor[Item](ReadPreference.primary)}
 
-    val list: Future[List[JsObject]] = cursor.flatMap(_.collect[List]())
+    val list: Future[List[Item]] = cursor.flatMap(_.collect[List]())
+
+    list.map{
+      item =>
+        Ok(item.toString())
+    }
+  }
+
+  def getAll = Action.async {
+    val cursor: Future[Cursor[Item]] = itemCol.map{_.find(Json.obj())
+      .sort(Json.obj("id" -> -1))
+      .cursor[Item](ReadPreference.primary)}
+
+    val list: Future[List[Item]] = cursor.flatMap(_.collect[List]())
 
     val array: Future[JsArray] = list.map {
       item => Json.arr(item)
     }
 
     list.map{
-      item => item.foreach{
-        i =>
-          println("**********************")
-          val nItem = i.validate[Item]
-          if(nItem.isSuccess)
-            Item.items += nItem.get
-          println(i.validate[Item])
+      item => mongoHelpers.createNewList(item) match {
+        case true => Redirect(routes.Application.index())
+        case false => BadRequest("something happened")
       }
     }
-
-
-
-    array.map{
-      item =>
-        println()
-        println("="*50)
-        println(Item.items)
-        Ok(item)
-    }
-
   }
 
-  def getAll = Action.async {
-    val cursor: Future[Cursor[JsObject]] = itemCol.map{_.find(Json.obj()).cursor[JsObject](ReadPreference.primary)}
+  //==========================DELETE======================================
+  def deleteItem(id: Int) = Action {
+    Item.items.remove(id)
+    Redirect(routes.Application.index())
+  }
 
-    val list: Future[List[JsObject]] = cursor.flatMap(_.collect[List]())
+  def deleteFromDB(id: Int)  =  Action.async {
+    val itemId = () => if(!Item.items.isEmpty) Item.items(id).id else ""
+    val itemRemove = itemCol.map{_.findAndRemove(Json.obj("id"->itemId()))}
 
-    val array: Future[JsArray] = list.map {
-      item => Json.arr(item)
-    }
-
-    array.map{
-      item => Ok(item)
+    itemRemove.map {
+      stuff => Ok("deleted succesffully")
     }
   }
+
 
   def formHandler(id: Int) = Action { implicit request: Request[AnyContent] =>
     val formResult = Item.itemForm.bindFromRequest
@@ -98,10 +95,6 @@ class Application @Inject() (val messagesApi: MessagesApi, val reactiveMongoApi:
     },{
       item => formHelper(item)
     })
-  }
-
-  def index(id: Int=0) = Action {
-        Ok (views.html.index(Item.itemForm, id))
   }
 
   def formHelper(item: Item): Result = {

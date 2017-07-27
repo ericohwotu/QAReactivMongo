@@ -1,0 +1,64 @@
+.section{
+    background-color: rgba(0,0,0,0.5);
+    border-radius: 5px;
+    overflow-x: auto;
+    padding: 20px;
+}
+
+tbody > tr:hover {
+    cursor: pointer;
+    background-color: rgba(255,78,78,0.5) !important;
+}
+
+dd.info{
+    display: none;
+}
+
+.table {
+    display:table;
+    border-radius: 5px;
+    color: whitesmoke;
+}
+.table-row {
+    display:table-row;
+}
+.table-body {
+    display: table-row-group;
+}
+.table-cell {
+    display:table-cell;
+    border-bottom-style: solid;
+    border-bottom-width: thin;
+    border-color: lightgray !important;
+    padding: 5px;
+}
+.tabel-header{
+    display:table-header-group;
+}
+.header{
+    font-weight: bold;
+    border-bottom-width: 2px;
+    font-size: larger;
+}
+.table > a:hover{
+    text-decoration: blink;
+    background-color: rgba(0,0,0,0.3);
+
+}
+
+.table > a.active{
+    text-decoration: blink;
+    background-color: #5cb85c;
+}
+
+.table > a{
+    text-decoration: blink;
+    color: black;
+    font-family: Verdana;
+}
+
+a.btn {
+    background-color: #5cb85c;
+    color:
+}
+

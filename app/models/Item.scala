@@ -2,14 +2,15 @@ package models
 
 import play.api.data._
 import play.api.data.Forms._
-import play.api.libs.json.Json
+import play.api.libs.json._
+import play.api.libs.functional.syntax._
 
 import scala.collection.mutable.ListBuffer
 
 
 case class Item(var id: String="NULL", var name: String, var price: BigDecimal, var description: String = "",
                 var manufacturer: String = "", var warranty: Int,
-                var discount: BigDecimal = 0, var seller: String = "", var image: String = ""){
+                var discount: Option[BigDecimal] = Some(0), var seller: String = "", var image: String = ""){
 
 
   def replace(item: Item): Unit ={
@@ -37,7 +38,7 @@ object Item {
       "description" -> text,
       "manufacturer" -> text,
       "warranty" -> default(number,720),
-      "discount" -> bigDecimal(9,2),
+      "discount" -> optional(bigDecimal(9,2)),
       "seller" -> text,
       "image" -> text
     )(Item.apply _)(Item.unapply _))
@@ -51,6 +52,32 @@ object Item {
 
   //mongodb stuff
   implicit val itemFormat = Json.format[Item]
+
+//  //json readers
+//  implicit val itemReader: Reads[Item] = (
+//    (__ \ "id").read[String] and
+//      (__ \ "name").read[String] and
+//      (__ \ "price").read[BigDecimal] and
+//      (__ \ "description").read[String] and
+//      (__ \ "manufacturer").read[String] and
+//      (__ \ "warranty").read[Int] and
+//      (__ \ "discount").read[BigDecimal] and
+//      (__ \ "seller").read[String] and
+//      (__ \ "image").read[String]
+//    )(Item.apply _)
+//
+//  //json writers
+//  implicit val itemWriter: Writes[Item] = (
+//    (__ \ "id").write[String] and
+//      (__ \ "name").write[String] and
+//      (__ \ "price").write[BigDecimal] and
+//      (__ \ "description").write[String] and
+//      (__ \ "manufacturer").write[String] and
+//      (__ \ "warranty").write[Int] and
+//      (__ \ "discount").write[BigDecimal] and
+//      (__ \ "seller").write[String] and
+//      (__ \ "image").write[String]
+//    )(unlift(Item.unapply))
 
 }
 

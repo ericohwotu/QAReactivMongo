@@ -7,6 +7,8 @@ GET     /                           controllers.Application.index(id: Int ?= 0)
 POST    /                           controllers.Application.formHandler(id: Int ?= 0)
 GET     /find                       controllers.Application.find(name: String)
 GET     /get                        controllers.Application.getAll
+GET     /delete                     controllers.Application.deleteItem(id: Int)
+GET     /db/delete                  controllers.Application.deleteFromDB(id: Int)
 
 # Map static resources from the /public folder to the /assets URL path
 GET     /assets/*file               controllers.Assets.at(path="/public", file)
