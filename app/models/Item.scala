@@ -43,12 +43,30 @@ object Item {
       "image" -> text
     )(Item.apply _)(Item.unapply _))
 
+  val searchForm: Form[Item] = Form(
+    mapping(
+      "id" -> text,
+      "name" -> text,
+      "price" -> bigDecimal(9,2),
+      "description" -> text,
+      "manufacturer" -> text,
+      "warranty" -> default(number,720),
+      "discount" -> optional(bigDecimal(9,2)),
+      "seller" -> text,
+      "image" -> text
+    )(Item.apply _)(Item.unapply _))
+
 
   val items: ListBuffer[Item] = ListBuffer(
     Item(0.toString,"PS4", 245, "The ultimate in console gaming", "sony", 730),
     Item(1.toString,"XBOX ONE", 245, "The ultimate in console gaming", "Microsoft", 730),
     Item(2.toString,"Samsung Galaxy S8", 245, "The sexiest smartphone available", "Samsung", 730)
   )
+
+  def setGlobalID(items: List[Item]): Unit =items.isEmpty match {
+    case true => nId = 1
+    case false => nId = items.head.id.toInt
+  }
 
   //mongodb stuff
   implicit val itemFormat = Json.format[Item]

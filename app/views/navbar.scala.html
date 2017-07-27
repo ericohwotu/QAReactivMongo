@@ -5,8 +5,8 @@
       <a class="navbar-brand" href="#">@title</a>
     </div>
     <ul class="nav navbar-nav">
-      <li @page(0)><a href="#">Home</a></li>
-      <li @page(1)><a href="#">About</a></li>
+      <li @page(0)><a href="@routes.Application.getAll(isNew = None)">Home</a></li>
+      <li @page(1)><a href="@routes.Application.searchPage()">Search</a></li>
       <li @page(2)><a href="#">Page 2</a></li>
       <li @page(3)><a href="#">Page 3</a></li>
     </ul>

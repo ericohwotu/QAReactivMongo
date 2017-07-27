@@ -3,12 +3,14 @@
 # ~~~~
 
 # Home page
-GET     /                           controllers.Application.index(id: Int ?= 0)
+GET     /home                       controllers.Application.index(item: Int ?= 0)
 POST    /                           controllers.Application.formHandler(id: Int ?= 0)
 GET     /find                       controllers.Application.find(name: String)
-GET     /get                        controllers.Application.getAll
+GET     /                           controllers.Application.getAll(item: Int ?= 0, isNew: Option[String])
 GET     /delete                     controllers.Application.deleteItem(id: Int)
 GET     /db/delete                  controllers.Application.deleteFromDB(id: Int)
+GET     /search                     controllers.Application.searchPage
+POST    /search                     controllers.Application.searchFormHandler(id: Int)
 
 # Map static resources from the /public folder to the /assets URL path
 GET     /assets/*file               controllers.Assets.at(path="/public", file)
