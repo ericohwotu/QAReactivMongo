@@ -1,0 +1,30 @@
+@import scala.collection.mutable.ListBuffer;var index = 0
+@(items: ListBuffer[Item])(id: Int)
+<div>
+<div class="table">
+
+    <div class="table-row header-row">
+        <div class="table-cell header">Name</div>
+        <div class="table-cell header">Price</div>
+        <div class="table-cell header">Description</div>
+        <div class="table-cell header">Manufacturer</div>
+    </div>
+
+    @{index = 0}
+    @for(item <- items) {
+        @if(id==index){
+            <a class="table-row  active" href="/?item=@index" id="@index">
+        }else{
+            <a class="table-row" href="@routes.Application.getAll(index,None)" id="@index">
+        }
+            <div class="table-cell">@item.name</div>
+            <div class="table-cell">@item.price</div>
+            <div class="table-cell">@item.description</div>
+            <div class="table-cell">@item.manufacturer</div>
+        </a>
+        @{index = index + 1}
+    }
+    </div>
+
+        <a @if(items.isEmpty){class="btn disabled"} else {class="btn"} href="@routes.Application.deleteFromDB(id)">Delete</a>
+</div>
