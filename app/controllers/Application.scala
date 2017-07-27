@@ -4,6 +4,7 @@ import javax.inject.Inject
 
 import models.Item
 import play.api.i18n.{I18nSupport, MessagesApi}
+import scala.util.parsing.json._
 
 import scala.util.{Failure, Success}
 import scala.concurrent.Future
@@ -29,7 +30,7 @@ class Application @Inject()
 
   // pages
   val home = (id: Int, itemForm: Form[Item]) => Ok (views.html.home(navbarHelpers.homePage, Item.items, id)(itemForm))
-  val search = (id: Int, list: ListBuffer[Item]) => Ok (views.html.search(navbarHelpers.searchPage, list, id)(Item.searchForm))
+  val search = (id: Int, list: List[Item]) => Ok (views.html.search(navbarHelpers.searchPage, list, id)(Item.searchForm))
 
 
   //the collection for the items
@@ -113,8 +114,7 @@ class Application @Inject()
     val formResult = Item.itemForm.bindFromRequest
     formResult.fold({
       errors =>
-        println(errors)
-        BadRequest(views.html.index(errors, id))
+        home(id,errors)
     },{
       item => formHelper(item)
     })
@@ -129,9 +129,9 @@ class Application @Inject()
         Item.nId += 1
       case x if x.length == 1 =>
         jsonUpdatHelper(item)
-        x.head.replace(item)
+        //x.head.replace(item)
     }
-    println(Item.items)
+
     Redirect(routes.Application.getAll(isNew = None))
   }
 
@@ -148,26 +148,42 @@ class Application @Inject()
 
   //========================================SEARCH===========================/
   def searchPage = Action{
-    search(0, ListBuffer())
+    search(0, Item.queryItems)
   }
 
-  def searchFormHandler(id: Int) = Action { implicit request: Request[AnyContent] =>
+  def searchFormHandler(id: Int) = Action.async { implicit request: Request[AnyContent] =>
     println("="*50)
     val searchResult = Item.searchForm.bindFromRequest
 
+    val itemList = runSearchQuery(getQuery(searchResult.data))
 
-    searchResult.fold({
-      errors =>
-        println("="*70)
-        println(getString(searchResult.data)(" "))
-        println("="*70)
+    itemList.map {
+      case list =>
+        Item.queryItems = list
+        Redirect(routes.Application.searchPage())
+    }
 
-        BadRequest(views.html.index(errors, id))
-    },{
-      item => formHelper(item)
-    })
   }
 
-  def getString(m: Map[String,String])(res: String): Map[String,String] = m.filter(_._2 != "").filter(_._1 != "id")
+  def getQuery(m: Map[String,String]): Map[String,Any] = m.filter(_._2 != "").filter(_._1 != "id").map{
+    case (key, value) if key=="warranty" => (key, Integer.parseInt(value))
+    case (key, value) if key=="price" => (key, BigDecimal.apply(value))
+    case (key, value) if key=="discount" => (key, BigDecimal.apply(value))
+    case (key, value) => (key,value)
+  }
 
+  def runSearchQuery(m: Map[String, Any]): Future[List[Item]]={
+
+    val query = Json.parse(JSONObject(m).toString()).as[JsObject]
+    println(query)
+
+    val result = itemCol.map{
+      _.find(query).sort(Json.obj("id" -> -1))
+        .cursor[Item](ReadPreference.primary)
+    }
+
+    val list = result.flatMap(_.collect[List]())
+
+    list
+  }
 }

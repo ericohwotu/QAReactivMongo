@@ -63,6 +63,8 @@ object Item {
     Item(2.toString,"Samsung Galaxy S8", 245, "The sexiest smartphone available", "Samsung", 730)
   )
 
+  var queryItems: List[Item] = List()
+
   def setGlobalID(items: List[Item]): Unit =items.isEmpty match {
     case true => nId = 1
     case false => nId = items.head.id.toInt

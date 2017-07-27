@@ -1,5 +1,5 @@
 @import scala.collection.mutable.ListBuffer
-@(pages: List[String], items: ListBuffer[Item], id: Int)(form: Form[Item])(implicit messages: Messages)
+@(pages: List[String], items: List[Item], id: Int)(form: Form[Item])(implicit messages: Messages)
 <!DOCTYPE html>
 <html lang="en">
     <head>
@@ -17,14 +17,8 @@
                 @searchform(form, id)
             </div>
 
-            <div class="row">
-
-
-                <div class="row section">
-                @itemslist(items)(id)
-                </div>
-
-
+            <div class="row section">
+                @itemslisttwo(items)(id)
             </div>
 
         </div>
