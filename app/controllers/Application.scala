@@ -11,7 +11,6 @@ import scala.concurrent.Future
 import play.api.mvc._
 import play.api.libs.concurrent.Execution.Implicits.defaultContext
 import play.modules.reactivemongo.{MongoController, ReactiveMongoApi, ReactiveMongoComponents}
-import reactivemongo.play.json.collection._
 import reactivemongo.play.json._
 import reactivemongo.play.json.collection.{JSONCollection, JsCursor}
 import JsCursor._
